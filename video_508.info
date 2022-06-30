@@ -1,0 +1,8 @@
+name = Video 508
+description = 508-compliant video player implementation
+core = 7.x
+package = Video 508
+version = 7.x-1.0
+config = /admin/config/media/video-508
+dependencies[] = libraries
+dependencies[] = videojs

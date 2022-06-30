@@ -1,0 +1,28 @@
+{
+  "name": "video-508-videojs-font",
+  "version": "1.0.0",
+  "description": "Icons font for Video 508",
+  "repository": {},
+  "keywords": [
+    "video 508",
+    "508",
+    "videojs",
+    "font"
+  ],
+  "author": "WebFirst, Inc",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "lodash": "^4.17.0",
+    "material-design-icons": "^3.0.1",
+    "webfonts-generator": "^0.4.0",
+    "node-sass": "^5.0.0",
+    "cli": "^1.0.1"
+  },
+  "scripts": {
+    "start": "npm run sass:build && npm run sass:watch",
+    "build": "npm run font:build && npm run sass:build",
+    "sass:build": "node-sass ./scss -o ./css --indent-width 2 --output-style expanded --indent-type space --source-map true --functions ./scripts/functions.scss.js",
+    "sass:watch": "node-sass -wr ./scss/ -o ./css --indent-width 2 --output-style expanded --indent-type space --source-map true --functions ./scripts/functions.scss.js",
+    "font:build": "node ./icons.js"
+  }
+}

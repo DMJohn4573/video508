@@ -1,0 +1,376 @@
+<?php
+
+/**
+ * @file
+ * Code for the DOI.gov Video feature.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function video_508_menu() {
+  $items = array();
+  $items['video/download/%file'] = array(
+    'page callback' => 'video_508_file_download',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/media/video-508'] = array(
+    'title' => 'Video 508',
+    'description' => 'Video 508 settings',
+    'access callback' => TRUE,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('video_508_settings_form'),
+    'file' => 'video_508.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback for video downloads.
+ */
+function video_508_file_download($file) {
+  file_transfer($file->uri, array(
+    'Content-Type' => mime_header_encode($file->filemime),
+    'Content-Disposition' => 'attachment; filename="' . $file->filename . '"',
+    'Content-Length' => $file->filesize,
+    'Content-Transfer-Encoding' => 'binary',
+  ));
+}
+
+/**
+ * Implements hook_library()
+ * @return array[]
+ */
+function video_508_library() {
+  $path = drupal_get_path('module', 'video_508');
+  return array(
+    'video_508_jwplayer' => array(
+      'title' => 'Video 508 JavaScript for JW PLayer',
+      'website' => 'https://www.doi.gov',
+      'version' => '1.0',
+      'js' => array(
+        $path . '/libraries/jwplayer/video_508_jwplayer.js' => array('scope' => 'footer'),
+      ),
+    ),
+    'video_508_videojs' => array(
+      'title' => 'Video 508 JavaScript for VideoJS',
+      'website' => 'https://www.doi.gov',
+      'version' => '1.0',
+      'js' => array(
+        $path . '/libraries/videojs/videojs-ga.min.js' => array('scope' => 'footer'),
+        $path . '/libraries/videojs/videojs-dock.min.js' => array('scope' => 'footer'),
+        $path . '/libraries/videojs/videojs-social.min.js' => array('scope' => 'footer'),
+        $path . '/libraries/videojs/video_508_videojs.js' => array('scope' => 'footer'),
+      ),
+      'css' => array(
+        $path . '/libraries/videojs/videojs-dock.css' => array(
+          'type' => 'file'
+        ),
+        $path . '/libraries/videojs/videojs-social.css' => array(
+          'type' => 'file'
+        ),
+      )
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess_field().
+ * @todo verify the class name
+ */
+function video_508_preprocess_field(&$vars) {
+  $type = $vars['element']['#bundle'];
+  $options = _video_508_options_defaults("video-508-{$type}-options");
+  if (empty($options['transcript']['source'])) {
+    return;
+  }
+  if ($options['transcript']['source'] === $vars['element']['#field_name']) {
+    $vars['classes_array'][] = "video-508--transcript";
+    if ($options['transcript']['hidden']) {
+      $vars['classes_array'][] = 'video-508--transcript--hidden';
+    }
+  }
+}
+
+/**
+ * Implements hook_process_HOOK().
+ */
+function video_508_process_jw_player(&$vars) {
+  global $base_url;
+
+  // Get entity type and associated configuration
+  $type = $vars['entity']->type;
+  $allowed_types = variable_get('video-508-types', array());
+  if (empty($allowed_types[$type])) {
+    return;
+  }
+
+  // Add entity data and settings for player.
+  $options = _video_508_options_defaults("video-508-{$type}-options");
+  $_node = entity_metadata_wrapper('node', $vars['entity']);
+
+  // Additional settings.
+  $vars['config']['sharing'] = TRUE;
+  $vars['config']['captions'] = array(
+    'backgroundOpacity' => '80',
+    'windowColor' => '000000',
+    'windowOpacity' => '100',
+  );
+  $vars['config']['ga'] = array(
+    'idstring' => 'title',
+    'label' => 'title',
+  );
+
+  // Add metadata.
+  $vars['config']['aboutlink'] = $base_url;
+  $vars['config']['abouttext'] = variable_get('site_name', '');
+
+  // Add player logo.
+  $vars['config']['logo'] = array(
+    'file' => base_path() . variable_get('VIDEO_508_PLAYER_DEFAULT_LOGO', ''),
+    'link' => $base_url,
+  );
+
+  // CAPTIONS
+  $field = $options['captions'];
+  if (!empty($field) && !empty($_node->{$field})) {
+    $caption_file = $_node->{$field}->value();
+
+    $caption_config = new stdClass();
+    $caption_config->file = file_create_url($caption_file['uri']);
+    $caption_config->default = TRUE;
+
+    $vars['config']['tracks'] = array($caption_config);
+  }
+
+  // THUMBNAIL
+  $field = $options['thumbnail'];
+  if (!empty($field) && !empty($_node->{$field})) {
+    $thumbnail = $_node->{$field}->value();
+    $vars['config']['image'] = file_create_url($thumbnail['uri']);
+  }
+
+  // YOUTUBE
+  $field = $options['youtube'];
+  $youtube = !empty($field) && !empty($_node->{$field}) ? $_node->{$field}->value() : '';
+
+  // VIDEO
+  $field = $options['video'];
+  $video = !empty($field) && !empty($_node->{$field}) ? $_node->{$field}->value() : '';
+  $video_size = !empty($video) ? format_size($video['filesize']) : 0;
+
+  if (drupal_is_front_page()) {
+    $video_data = array(
+      'html_id' => $vars['html_id'],
+      'url' => base_path() . "video/download/{$video['fid']}",
+      'youtube' => $youtube['url'],
+      'buttons' => array(
+        'download' => array(
+          'icon' => base_path() . variable_get('VIDEO_508_DOWNLOAD_ICON', ''),
+          'label' => t('Download without branding overlay (!size)', array('!size' => $video_size)),
+        ),
+        'youtube' => array(
+          'icon' => base_path() . variable_get('VIDEO_508_PLAYER_YOUTUBE_ICON', ''),
+          'label' => t('Watch on YouTube'),
+        ),
+      ),
+      'size' => $video_size,
+    );
+  }
+  else {
+    $video_data = array(
+      'html_id' => $vars['html_id'],
+      'url' => base_path() . "video/download/{$video['fid']}",
+      'youtube' => $youtube['url'],
+      'buttons' => array(
+        'download' => array(
+          'icon' => base_path() . variable_get('VIDEO_508_DOWNLOAD_ICON', ''),
+          'label' => t('Download Video (!size)', array('!size' => $video_size)),
+        ),
+        'transcript' => array(
+          'icon' => base_path() . variable_get('VIDEO_508_PLAYER_TRANSCRIPT_ICON', ''),
+          'label' => t('Toggle Transcript'),
+        ),
+        'youtube' => array(
+          'icon' => base_path() . variable_get('VIDEO_508_PLAYER_YOUTUBE_ICON', ''),
+          'label' => t('Watch on YouTube'),
+        ),
+      ),
+      'size' => $video_size,
+    );
+  }
+
+  video_508_preprocess_player($vars['html_id'], $video_data, 'jwplayer', $options);
+}
+
+
+/**
+ * Implements hook_process_HOOK().
+ */
+function video_508_process_videojs(&$vars) {
+  global $base_url;
+
+  // Get entity type and associated configuration
+  $type = $vars['entity']->type;
+  $allowed_types = variable_get('video-508-types', array());
+  if (empty($allowed_types[$type])) {
+    return;
+  }
+
+  // Add entity data and settings for player.
+  $options = _video_508_options_defaults("video-508-{$type}-options");
+  $_node = entity_metadata_wrapper('node', $vars['entity']);
+
+  // CAPTIONS
+  $field = $options['captions'];
+  if (!empty($field) && !empty($_node->{$field})) {
+    $caption_file = $_node->{$field}->value();
+
+    $caption_config = array(
+      'default' => TRUE,
+      'kind' => 'captions',
+      'langcode' => 'en',
+      'label' => 'English',
+      'src' => array(
+        'safe' => file_create_url($caption_file['uri']),
+      ),
+      'filemime' => array(
+        'safe' => 'text/vtt'
+      ),
+    );
+
+    $vars['tracks'] = array($caption_config);
+  }
+
+  // THUMBNAIL
+  $field = $options['thumbnail'];
+  if (!empty($field) && !empty($_node->{$field})) {
+    $thumbnail = $_node->{$field}->value();
+    //$vars['config']['image'] = file_create_url($thumbnail['uri']);
+    $vars['poster'] = file_create_url($thumbnail['uri']);
+  }
+
+  // YOUTUBE
+  $field = $options['youtube'];
+  $youtube = !empty($field) && !empty($_node->{$field}) ? $_node->{$field}->value() : '';
+  $youtube_url = !empty($youtube) ? $youtube['url'] : '';
+
+  // VIDEO
+  $field = $options['video'];
+  $video = !empty($field) && !empty($_node->{$field}) ? $_node->{$field}->value() : '';
+  $video_size = !empty($video) ? format_size($video['filesize']) : 0;
+  $video_dl = !empty($video) ? base_path() . "video/download/{$video['fid']}" : "";
+  $video_url = !empty($video) ? file_create_url($video['uri']) : "";
+
+  // AD VIDEO
+  $field = $options['video-ad'];
+  $ad_video = !empty($field) && !empty($_node->{$field}) ? $_node->{$field}->value() : '';
+  $ad_video_url = !empty($ad_video) ? file_create_url($ad_video['uri']) : "";
+
+  if (drupal_is_front_page()) {
+    $video_data = array(
+      'player_id' => $vars['player_id'],
+      'logo' => array(
+        'file' => base_path() . variable_get('video_508_player_logo', variable_get('video_508_PLAYER_DEFAULT_LOGO', '')),
+        'label' => t('DOI Logo'),
+        'link' => $base_url,
+      ),
+      'url' => $video_dl,
+      'files' => array(
+        'src' => $video_url,
+        'ad_src' => $ad_video_url,
+      ),
+      'youtube' => $youtube_url,
+      'buttons' => array(
+        'download' => array(
+          'label' => t('Download Video (!size)', array('!size' => $video_size)),
+        ),
+        'youtube' => array(
+          'label' => t('Watch on YouTube'),
+        ),
+      ),
+      'size' => $video_size,
+    );
+  }
+  else {
+    $video_data = array(
+      'player_id' => $vars['player_id'],
+      'logo' => array(
+        'file' => base_path() . variable_get('VIDEO_508_PLAYER_DEFAULT_LOGO', ''),
+        'label' => t('DOI Logo'),
+        'link' => $base_url,
+      ),
+      'url' => $video_dl,
+      'files' => array(
+        'src' => $video_url,
+        'ad_src' => $ad_video_url,
+      ),
+      'youtube' => $youtube_url,
+      'buttons' => array(
+        'download' => array(
+          'label' => t('Download Video (!size)', array('!size' => $video_size)),
+        ),
+        'transcript' => array(
+          'label' => t('Toggle Transcript'),
+        ),
+        'youtube' => array(
+          'label' => t('Watch on YouTube'),
+        ),
+      ),
+      'size' => $video_size,
+    );
+  }
+
+  video_508_preprocess_player($vars['player_id'], $video_data, 'videojs', $options);
+}
+
+/**
+ * Loads CSS/JS and adds some final configs to the player instance
+ *
+ * @param $id string Player instance ID
+ * @param $video_data array Player data
+ * @param $type string Type of the player - videojs or jwplayer
+ * @param $options array Node type options
+ */
+function video_508_preprocess_player($id, $video_data, $type, $options) {
+
+  $video_data['bundleOptions'] = $options;
+  $name =  "video_508_{$type}";
+  // Add VideoJS addons
+  drupal_add_css(drupal_get_path('module', 'video_508') . '/css/video_508.css');
+  drupal_add_library('video_508', $name);
+
+  // Add settings
+  drupal_add_js(array(
+    $name => array(
+      'instances' => array($id => $video_data),
+    ),
+  ), 'setting');
+}
+
+/**
+ * Generates default values for the field configuration form
+ *
+ * @param string $var Configuration variable name
+ * @return array Defaults
+ */
+function _video_508_options_defaults($var) {
+  $defaults = array(
+    'video' => '',
+    'video-ad' => '',
+    'captions' => '',
+    'thumbnail' => '',
+    'transcript' => array(
+      'source' => '',
+      'hidden' => false,
+    ),
+    'youtube' => '',
+  );
+  $saved = variable_get($var, array());
+  return array_merge($defaults, $saved);
+}
+

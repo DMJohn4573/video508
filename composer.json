@@ -1,0 +1,9 @@
+{
+	"name": "doi/video508",
+	"description": "DOI.gov: 508-compliant video player for Drupal 7.",
+	"type": "drupal-module",
+	"require-dev": {
+		"drupal/libraries": "^2.5",
+		"drupal/videojs": "*"
+	}
+}

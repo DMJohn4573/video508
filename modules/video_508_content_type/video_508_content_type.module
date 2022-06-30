@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * @file
+ * Main video508_content_type module file
+ */
+
+include_once 'video_508_content_type.features.inc';
+

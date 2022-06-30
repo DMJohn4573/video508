@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Install/uninstall operations for the module
+ */
+
+/**
+ * Implements hook_install()
+ */
+function video_508_install() {
+  $path = drupal_get_path('module', 'video_508');
+  variable_set('VIDEO_508_PLAYER_DEFAULT_LOGO', $path . '/images/player-logo.png');
+  variable_set('VIDEO_508_DOWNLOAD_ICON', $path . '/images/player-download.png');
+  variable_set('VIDEO_508_PLAYER_TRANSCRIPT_ICON', $path . '/images/player-transcript.png');
+  variable_set('VIDEO_508_PLAYER_YOUTUBE_ICON', $path . '/images/player-youtube.png');
+}
+
+/**
+ * Implements hook_install()
+ */
+function video_508_uninstall() {
+  variable_del('VIDEO_508_PLAYER_DEFAULT_LOGO');
+  variable_del('VIDEO_508_DOWNLOAD_ICON');
+  variable_del('VIDEO_508_PLAYER_TRANSCRIPT_ICON');
+  variable_del('VIDEO_508_PLAYER_YOUTUBE_ICON');
+}

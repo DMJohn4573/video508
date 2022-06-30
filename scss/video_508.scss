@@ -1,0 +1,127 @@
+@import "font";
+
+.video-js {
+  position: relative;
+
+  &.vjs-enforce-big-button {
+    .vjs-big-play-button {
+      display: block;
+    }
+  }
+  .vjs-dock-shelf {
+    left: 0;
+    text-align: left !important;
+    padding: 0 !important;
+
+    .vjs-button {
+      position: relative;
+      padding: .7em !important;
+
+      &.vjs-brand-control {
+        float: right;
+        img {
+          float: right;
+          width: 100%;
+        }
+      }
+      &.vjs-share-control,
+      &.vjs-download-control,
+      &.vjs-youtube-control,
+      &.vjs-transcript-control,
+      &.vjs-brand-control {
+        margin: 0!important;
+        span {
+          position: absolute !important;
+          top: -9999px !important;
+          left: -9999px !important;
+        }
+        &:before {
+          position: relative;
+          font-family: "Video508Icons", Sans-Serif;
+          vertical-align: top;
+          color: #FFFFFF;
+          font-size: .8em;
+          line-height: 1em;
+          text-align: center;
+          cursor: pointer;
+        }
+      }
+
+    }
+
+  }
+  .vjs-download-control:before {
+    content: "\f11d";
+  }
+
+  .vjs-youtube-control:before {
+    content: "\f11c";
+  }
+
+  .vjs-transcript-control:before {
+    content: "\f11e";
+  }
+
+  .vjs-big-play-button:before {
+    font-size: 1em;
+  }
+
+  .vjs-big-play-button {
+    position: absolute;
+    top: 50% !important;
+    left: 50% !important;
+    margin-top: -0.81666em;
+    margin-left: -1.5em;
+
+  }
+}
+
+.vjs-menu {
+  li.vjs-menu-item {
+    &:hover {
+      background-color: #73859f !important;
+      background-color: rgba(115, 133, 159, 0.5) !important;
+    }
+  }
+}
+
+.vjs-menu-button-popup .vjs-menu ul.vjs-menu-content {
+  width: 8em !important;
+  max-width: initial;
+}
+
+.vjs-captions-button .vjs-menu li {
+  text-transform: capitalize;
+  font-size: 1em;
+}
+
+@media screen and (min-width: 600px) {
+  .video-js {
+    font-size: 1em !important;
+  }
+
+  .vjs-dock-shelf .vjs-button.vjs-brand-control img {
+    width: 100%;
+  }
+
+  .video-js .vjs-control.vjs-close-button .vjs-icon-placeholder:before {
+    font-size: 3em !important;
+  }
+
+  .vjs-social-overlay .vjs-control.vjs-close-button .vjs-icon-placeholder:before {
+    line-height: normal !important;
+  }
+
+  .vjs-big-play-button:before {
+    font-size: inherit;
+  }
+}
+
+.video-508--transcript {
+  margin: 0.5em 0;
+  padding: 0.5em 0.5em 0;
+  border: 1px solid #eee;
+  &.video-508--transcript--hidden {
+    display: none;
+  }
+}
