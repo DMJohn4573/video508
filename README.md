@@ -3,10 +3,10 @@
 508-compliant video player implementation for Drupal 7, based on VideoJS library.
 
 [![Drupal](https://badgen.net/badge/Drupal/7.x/blue)](https://www.drupal.org/7)
-[![Release](https://badgen.net/github/release/DMJohn4573/video508)](https://github.com/ekubovsky/video508/releases)
+[![Release](https://badgen.net/github/release/DMJohn4573/video508)](https://github.com/DMJohn4573/video508/releases)
 [![License](https://badgen.net/github/license/DMJohn4573/video508)][license]
-[![Updated](https://badgen.net/github/last-commit/DMJohn4573/video508/master)](https://github.com/ekubovsky/video508)
-[![Issues](https://badgen.net/github/open-issues/DMJohn4573/video508)](https://github.com/ekubovsky/video508/releases/issues)
+[![Updated](https://badgen.net/github/last-commit/DMJohn4573/video508/main)](https://github.com/DMJohn4573/video508)
+[![Issues](https://badgen.net/github/open-issues/DMJohn4573/video508)](https://github.com/DMJohn4573/video508/releases/issues)
 
 ## Requirements/Prerequisites
 
