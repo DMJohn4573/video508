@@ -63,14 +63,14 @@ The configuration of the module is found at `admin/config/media/video-508`.
 
 ## Contribution guidelines
 
-For agencies willing to participate and contribute, please create a forks.
+For agencies willing to participate and contribute - please create a fork and submit a PR.
 
 ## Support
 
-The module has been developed for Drupal 7 and has no Drupal 9/10 support. There are no current plans on porting the modules to Drupal 9/10.
+The module has been developed for Drupal 7 and has no Drupal 9/10 support. There are plans on porting the modules to Drupal 9/10, but the roadmap and release date are TBD.
 
 This repository is owned by [US Department of Interior][doi.gov]
-For support, please log issues within the project issues queue.
+For support, please log issues within the project's issues queue.
 
 ## Credits
 
@@ -78,7 +78,7 @@ For support, please log issues within the project issues queue.
 - Support by [US Department of Interior][doi.gov].
 
 [doi.gov]: https://www.doi.gov
-[serbfirst]: https://www.webfirst.com
+[webfirst]: https://www.webfirst.com
 [drupal/libraries]: https://www.drupal.org/project/libraries
 [drupal/videojs]: https://www.drupal.org/project/videojs
 [videojs/videojs]: https://github.com/videojs/video.js
